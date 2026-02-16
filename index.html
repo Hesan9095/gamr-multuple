@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voxel Arena P2P - Local Network Multiplayer</title>
+    <title>Voxel Arena - P2P Battle</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
@@ -13,129 +13,155 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Press Start 2P', cursive; 
-            background: #0f0f0f;
-            overflow: hidden;
+            background: #0a0a0a;
             color: white;
+            overflow: hidden;
         }
         
         #game-canvas {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: 1;
-        }
-        
-        .ui-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none;
-        }
-        
-        .ui-layer.interactive {
-            pointer-events: auto;
         }
         
         .screen {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f23 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 100;
+            padding: 20px;
         }
         
-        .screen.hidden { display: none !important; }
+        .hidden { display: none !important; }
         
         .title {
-            font-size: 2.5rem;
+            font-size: 3rem;
             color: #fbbf24;
-            text-shadow: 4px 4px 0 #000;
+            text-shadow: 0 0 20px #fbbf24, 4px 4px 0 #000;
             margin-bottom: 10px;
             text-align: center;
         }
         
         .subtitle {
             color: #60a5fa;
-            font-size: 0.8rem;
-            margin-bottom: 30px;
+            font-size: 0.7rem;
+            margin-bottom: 40px;
             text-align: center;
-            line-height: 1.8;
+            line-height: 2;
         }
         
         .btn {
-            background: #fbbf24;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #000;
-            border: 4px solid #fff;
-            padding: 15px 30px;
+            border: none;
+            padding: 20px 40px;
             font-family: inherit;
-            font-size: 0.9rem;
+            font-size: 1rem;
             cursor: pointer;
             margin: 10px;
-            box-shadow: 0 6px 0 #b45309;
-            transition: all 0.1s;
-            pointer-events: auto;
-        }
-        
-        .btn:hover { transform: scale(1.05); }
-        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #b45309; }
-        .btn.secondary { background: #3b82f6; box-shadow: 0 6px 0 #1e40af; }
-        .btn.danger { background: #ef4444; box-shadow: 0 6px 0 #991b1b; }
-        
-        .connection-box {
-            background: rgba(0,0,0,0.7);
-            border: 2px solid #60a5fa;
-            padding: 20px;
             border-radius: 10px;
-            max-width: 600px;
-            width: 90%;
-            margin: 20px 0;
+            box-shadow: 0 6px 0 #92400e, 0 0 20px rgba(251, 191, 36, 0.5);
+            transition: all 0.1s;
+            font-weight: bold;
         }
         
-        .code-display {
-            background: #000;
-            border: 2px solid #fbbf24;
-            padding: 15px;
-            font-family: monospace;
-            font-size: 0.7rem;
-            color: #fbbf24;
-            word-break: break-all;
-            margin: 10px 0;
-            max-height: 100px;
-            overflow-y: auto;
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 0 #92400e, 0 0 30px rgba(251, 191, 36, 0.8);
+        }
+        .btn:active { 
+            transform: translateY(4px); 
+            box-shadow: 0 2px 0 #92400e, 0 0 20px rgba(251, 191, 36, 0.5);
+        }
+        .btn.secondary { 
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 6px 0 #1e40af, 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        .btn.secondary:active { box-shadow: 0 2px 0 #1e40af, 0 0 20px rgba(59, 130, 246, 0.5); }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
         }
         
-        .input-field {
-            width: 100%;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 0.7rem;
-            background: #1a1a1a;
+        .step-box {
+            background: rgba(0,0,0,0.6);
             border: 2px solid #60a5fa;
-            color: #fff;
-            margin: 10px 0;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 700px;
+            width: 100%;
+            margin: 15px 0;
         }
         
-        .status-indicator {
+        .step-number {
             display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 30px; height: 30px;
+            background: #fbbf24;
+            color: #000;
             border-radius: 50%;
-            margin-right: 8px;
+            text-align: center;
+            line-height: 30px;
+            font-size: 0.8rem;
+            margin-right: 10px;
         }
-        .status-offline { background: #ef4444; }
-        .status-connecting { background: #fbbf24; animation: blink 1s infinite; }
-        .status-online { background: #22c55e; }
+        
+        .code-box {
+            background: #000;
+            border: 2px solid #22c55e;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.6rem;
+            color: #22c55e;
+            word-break: break-all;
+            max-height: 120px;
+            overflow-y: auto;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .code-box:hover {
+            border-color: #4ade80;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+        
+        .code-input {
+            width: 100%;
+            background: #000;
+            border: 2px solid #60a5fa;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.6rem;
+            color: #fff;
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            font-size: 0.7rem;
+        }
+        
+        .status-dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+        }
+        .status-dot.connecting { background: #fbbf24; animation: blink 1s infinite; }
+        .status-dot.connected { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         
@@ -148,76 +174,58 @@
             justify-content: center;
             gap: 15px;
             flex-wrap: wrap;
+            z-index: 10;
             pointer-events: none;
         }
         
         .player-card {
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             border: 3px solid;
-            padding: 10px 15px;
-            border-radius: 8px;
-            min-width: 140px;
+            border-radius: 12px;
+            padding: 12px 18px;
+            min-width: 160px;
         }
         
-        .player-name { font-size: 0.7rem; margin-bottom: 5px; }
         .hp-bar {
-            height: 8px;
+            height: 10px;
             background: #333;
-            border-radius: 4px;
+            border-radius: 5px;
             overflow: hidden;
+            margin-top: 8px;
         }
         .hp-fill { height: 100%; transition: width 0.2s; }
         
-        .deaths { 
-            font-size: 0.6rem; 
-            color: #ef4444; 
-            margin-top: 5px;
-        }
-        
-        .ultimate-bar {
-            height: 4px;
+        .ult-bar {
+            height: 6px;
             background: #333;
-            border-radius: 2px;
-            margin-top: 4px;
+            border-radius: 3px;
             overflow: hidden;
+            margin-top: 6px;
         }
-        .ultimate-fill {
+        .ult-fill {
             height: 100%;
             background: linear-gradient(90deg, #fbbf24, #f59e0b);
             width: 0%;
             transition: width 0.3s;
         }
         
-        .controls-hint {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            padding: 15px 25px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 0.6rem;
-            line-height: 1.8;
-        }
-        
         .kill-feed {
             position: fixed;
-            top: 150px;
+            top: 140px;
             right: 20px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            align-items: flex-end;
+            gap: 8px;
+            z-index: 10;
         }
         
         .kill-msg {
             background: rgba(0,0,0,0.9);
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 0.6rem;
-            animation: slideIn 0.3s;
-            border-left: 3px solid #ef4444;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            border-left: 4px solid #ef4444;
+            animation: slideIn 0.4s ease-out;
         }
         
         @keyframes slideIn {
@@ -225,543 +233,417 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        .loading {
+        .controls-hint {
             position: fixed;
-            top: 50%;
+            bottom: 20px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.5rem;
-            color: #fbbf24;
-            z-index: 50;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            text-align: center;
+            line-height: 1.8;
+            z-index: 10;
         }
         
-        .error-msg {
-            color: #ef4444;
-            font-size: 0.7rem;
-            margin: 10px 0;
-            text-align: center;
+        .copy-hint {
+            color: #22c55e;
+            font-size: 0.6rem;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Canvas -->
     <canvas id="game-canvas"></canvas>
 
-    <!-- Loading -->
-    <div id="loading" class="loading hidden">LOADING...</div>
-
-    <!-- Main Menu -->
-    <div id="main-menu" class="screen">
-        <div class="title">VOXEL ARENA</div>
+    <!-- MAIN MENU -->
+    <div id="menu-screen" class="screen">
+        <div class="title">⚔️ VOXEL ARENA</div>
         <div class="subtitle">
-            LOCAL NETWORK MULTIPLAYER<br>
-            2-4 Players • Last Stand Wins<br>
-            3 Deaths = Ultimate • 5 Deaths = ELIMINATED
+            P2P MULTIPLAYER BATTLE<br>
+            No server needed - Direct connection<br>
+            2 Players • 5 Deaths = Elimination • 3 Deaths = Ultimate
         </div>
-        
-        <button class="btn" onclick="showHostMenu()">HOST GAME</button>
-        <button class="btn secondary" onclick="showJoinMenu()">JOIN GAME</button>
-        <button class="btn" onclick="showControls()">CONTROLS</button>
+        <button class="btn" onclick="startHost()">🎮 HOST GAME</button>
+        <button class="btn secondary" onclick="startJoin()">🚀 JOIN GAME</button>
     </div>
 
-    <!-- Host Menu -->
-    <div id="host-menu" class="screen hidden">
-        <div class="title">HOST GAME</div>
-        <div class="subtitle">Create a room for others to join</div>
+    <!-- HOST SCREEN -->
+    <div id="host-screen" class="screen hidden">
+        <div class="title" style="font-size: 2rem;">HOST GAME</div>
         
-        <div class="connection-box">
+        <div class="step-box">
             <div style="margin-bottom: 15px;">
-                <span class="status-indicator" id="host-status"></span>
-                <span id="host-status-text">Offline</span>
+                <span class="step-number">1</span>
+                <span style="color: #fbbf24;">Copy this OFFER code and send to friend:</span>
             </div>
-            
-            <div style="font-size: 0.7rem; margin-bottom: 10px;">Your Room Code (share this):</div>
-            <div class="code-display" id="host-code">Click "CREATE ROOM" to generate code</div>
-            
-            <button class="btn" onclick="createRoom()" id="create-btn">CREATE ROOM</button>
-            <button class="btn secondary hidden" onclick="startHostedGame()" id="start-btn">START GAME</button>
+            <div class="code-box" id="host-offer" onclick="copyToClipboard(this)">
+                Click "CREATE OFFER" to generate code...
+            </div>
+            <div class="copy-hint">👆 Click to copy</div>
+            <button class="btn" id="create-offer-btn" onclick="createHostOffer()">CREATE OFFER</button>
         </div>
         
-        <div class="connection-box">
-            <div style="font-size: 0.7rem; margin-bottom: 10px;">Connected Players:</div>
-            <div id="connected-players" style="font-size: 0.7rem; color: #60a5fa;">None</div>
-        </div>
-        
-        <button class="btn danger" onclick="showMenu()">BACK</button>
-    </div>
-
-    <!-- Join Menu -->
-    <div id="join-menu" class="screen hidden">
-        <div class="title">JOIN GAME</div>
-        <div class="subtitle">Enter the room code from host</div>
-        
-        <div class="connection-box">
+        <div class="step-box">
             <div style="margin-bottom: 15px;">
-                <span class="status-indicator" id="join-status"></span>
-                <span id="join-status-text">Offline</span>
+                <span class="step-number">2</span>
+                <span style="color: #fbbf24;">Paste friend's ANSWER code here:</span>
             </div>
-            
-            <div style="font-size: 0.7rem; margin-bottom: 10px;">Enter Room Code:</div>
-            <textarea class="input-field" id="join-code" rows="3" placeholder="Paste room code here..."></textarea>
-            
-            <button class="btn" onclick="joinRoom()" id="join-btn">CONNECT</button>
+            <textarea class="code-input" id="host-answer-input" placeholder="Paste answer code here..."></textarea>
+            <button class="btn" onclick="hostAcceptAnswer()">CONNECT & START</button>
         </div>
         
-        <div id="join-error" class="error-msg hidden"></div>
-        
-        <button class="btn danger" onclick="showMenu()">BACK</button>
-    </div>
-
-    <!-- Controls -->
-    <div id="controls-screen" class="screen hidden">
-        <div class="title" style="font-size: 1.8rem;">CONTROLS</div>
-        
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 800px; padding: 20px;">
-            <div class="connection-box">
-                <div style="color: #3b82f6; margin-bottom: 10px;">MOVEMENT</div>
-                <div style="font-size: 0.7rem; line-height: 2;">
-                    W A S D or ARROWS = Move<br>
-                    SPACE = Jump<br>
-                    Mouse = Camera (if enabled)
-                </div>
-            </div>
-            <div class="connection-box">
-                <div style="color: #ef4444; margin-bottom: 10px;">COMBAT</div>
-                <div style="font-size: 0.7rem; line-height: 2;">
-                    F or LEFT CLICK = Attack<br>
-                    G or RIGHT CLICK = Ultimate (when charged)<br>
-                    3 Deaths = Ultimate Charge<br>
-                    5 Deaths = ELIMINATED
-                </div>
-            </div>
+        <div class="status">
+            <div class="status-dot" id="host-status-dot"></div>
+            <span id="host-status-text">Waiting...</span>
         </div>
         
-        <button class="btn" onclick="showMenu()">BACK</button>
+        <button class="btn secondary" onclick="backToMenu()" style="margin-top: 20px;">BACK</button>
     </div>
 
-    <!-- Game HUD -->
-    <div id="game-hud" class="ui-layer hidden">
+    <!-- JOIN SCREEN -->
+    <div id="join-screen" class="screen hidden">
+        <div class="title" style="font-size: 2rem;">JOIN GAME</div>
+        
+        <div class="step-box">
+            <div style="margin-bottom: 15px;">
+                <span class="step-number">1</span>
+                <span style="color: #60a5fa;">Paste host's OFFER code:</span>
+            </div>
+            <textarea class="code-input" id="join-offer-input" placeholder="Paste offer code here..."></textarea>
+            <button class="btn" onclick="createJoinAnswer()">CREATE ANSWER</button>
+        </div>
+        
+        <div class="step-box hidden" id="join-answer-box">
+            <div style="margin-bottom: 15px;">
+                <span class="step-number">2</span>
+                <span style="color: #22c55e;">Copy this ANSWER code and send to host:</span>
+            </div>
+            <div class="code-box" id="join-answer" onclick="copyToClipboard(this)">
+                Generating...
+            </div>
+            <div class="copy-hint">👆 Click to copy, then wait for host to connect...</div>
+        </div>
+        
+        <div class="status">
+            <div class="status-dot" id="join-status-dot"></div>
+            <span id="join-status-text">Enter offer code</span>
+        </div>
+        
+        <button class="btn secondary" onclick="backToMenu()" style="margin-top: 20px;">BACK</button>
+    </div>
+
+    <!-- GAME HUD -->
+    <div id="game-hud" class="hidden">
         <div class="players-hud" id="players-hud"></div>
         <div class="kill-feed" id="kill-feed"></div>
-        <div class="controls-hint" id="controls-hint">
-            WASD = Move | SPACE = Jump | F = Attack | G = Ultimate
+        <div class="controls-hint">
+            <span style="color: #fbbf24;">WASD</span> = Move | 
+            <span style="color: #fbbf24;">SPACE</span> = Jump | 
+            <span style="color: #ef4444;">F / CLICK</span> = Attack | 
+            <span style="color: #fbbf24;">G / RIGHT-CLICK</span> = Ultimate
         </div>
     </div>
 
-    <!-- Game Over -->
+    <!-- GAME OVER -->
     <div id="game-over" class="screen hidden">
-        <div class="title" id="winner-title" style="color: #fbbf24;">GAME OVER</div>
-        <div class="subtitle" id="winner-subtitle">Player 1 Wins!</div>
+        <div class="title" id="winner-title">VICTORY!</div>
+        <div class="subtitle" id="winner-subtitle" style="color: #fbbf24; font-size: 1.2rem;">Player Wins!</div>
         <button class="btn" onclick="location.reload()">PLAY AGAIN</button>
     </div>
 
 <script>
 /**
- * P2P MULTIPLAYER GAME WITH WEBRTC
- * Works on local network without central server
+ * WORKING P2P MULTIPLAYER WITH MANUAL SIGNALING
  */
 
-// ==================== CONFIG ====================
+// Game Config
 const CONFIG = {
     chunkSize: 40,
     viewDistance: 3,
     maxDeaths: 5,
     ultimateDeaths: 3,
-    respawnTime: 3,
-    playerSpeed: 10,
-    playerRunSpeed: 18,
+    playerSpeed: 12,
+    playerRunSpeed: 20,
     jumpForce: 15,
     gravity: 35,
-    colors: [0x3b82f6, 0xef4444, 0x22c55e, 0xa855f7, 0xf59e0b, 0xec4899]
+    colors: [0x3b82f6, 0xef4444]
 };
 
-// ==================== GLOBALS ====================
-let canvas, ctx; // 2D fallback if WebGL fails
-let scene, camera, renderer;
-let simplex = new SimplexNoise();
+// Globals
+let scene, camera, renderer, simplex = new SimplexNoise();
 let clock = new THREE.Clock();
-let chunks = new Map();
-let particles = [];
+let chunks = new Map(), particles = [];
+let players = new Map(), localPlayer = null;
+let gameActive = false, myId = 0, isHost = false;
 
-// Network
-let peerConnection = null;
-let dataChannel = null;
-let isHost = false;
-let myPlayerId = 0;
-let connected = false;
+// WebRTC
+let pc = null, dc = null;
+const keys = {}, mouse = { down: false, rightDown: false };
 
-// Game State
-let players = new Map(); // id -> player object
-let localPlayer = null;
-let gameActive = false;
-let entities = [];
-
-// Input
-const keys = {};
-const mouse = { x: 0, y: 0, down: false, rightDown: false };
-
-// ==================== INITIALIZATION ====================
-
+// Initialize Three.js
 function init() {
-    // Try WebGL first
     try {
-        canvas = document.getElementById('game-canvas');
-        
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
         scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
 
         camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+        renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('game-canvas'), 
+            antialias: true 
+        });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(0x87CEEB);
         renderer.shadowMap.enabled = true;
-        
-        // Lights
+
         const ambient = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambient);
         
         const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
         dirLight.position.set(50, 100, 50);
         dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 2048;
-        dirLight.shadow.mapSize.height = 2048;
         scene.add(dirLight);
+
+        // Events
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
         
-        console.log("WebGL initialized successfully");
-        
+        document.addEventListener('keydown', e => keys[e.code] = true);
+        document.addEventListener('keyup', e => keys[e.code] = false);
+        document.addEventListener('mousedown', e => {
+            if(e.button === 0) mouse.down = true;
+            if(e.button === 2) mouse.rightDown = true;
+        });
+        document.addEventListener('mouseup', e => {
+            if(e.button === 0) mouse.down = false;
+            if(e.button === 2) mouse.rightDown = false;
+        });
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        console.log('✅ Game initialized');
     } catch(e) {
-        console.error("WebGL failed:", e);
-        alert("WebGL not supported! Please use a modern browser.");
-        return;
-    }
-    
-    // Events
-    window.addEventListener('resize', onResize);
-    document.addEventListener('keydown', e => { keys[e.code] = true; });
-    document.addEventListener('keyup', e => { keys[e.code] = false; });
-    document.addEventListener('mousedown', e => {
-        if(e.button === 0) mouse.down = true;
-        if(e.button === 2) mouse.rightDown = true;
-    });
-    document.addEventListener('mouseup', e => {
-        if(e.button === 0) mouse.down = false;
-        if(e.button === 2) mouse.rightDown = false;
-    });
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    
-    // Show menu
-    showMenu();
-}
-
-// ==================== UI FUNCTIONS ====================
-
-function showMenu() {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById('main-menu').classList.remove('hidden');
-    document.getElementById('game-hud').classList.add('hidden');
-}
-
-function showHostMenu() {
-    document.getElementById('main-menu').classList.add('hidden');
-    document.getElementById('host-menu').classList.remove('hidden');
-    updateHostStatus('offline');
-}
-
-function showJoinMenu() {
-    document.getElementById('main-menu').classList.add('hidden');
-    document.getElementById('join-menu').classList.remove('hidden');
-    updateJoinStatus('offline');
-}
-
-function showControls() {
-    document.getElementById('main-menu').classList.add('hidden');
-    document.getElementById('controls-screen').classList.remove('hidden');
-}
-
-function updateHostStatus(status) {
-    const indicator = document.getElementById('host-status');
-    const text = document.getElementById('host-status-text');
-    
-    indicator.className = 'status-indicator';
-    if(status === 'offline') {
-        indicator.classList.add('status-offline');
-        text.innerText = 'Offline';
-    } else if(status === 'connecting') {
-        indicator.classList.add('status-connecting');
-        text.innerText = 'Creating...';
-    } else if(status === 'online') {
-        indicator.classList.add('status-online');
-        text.innerText = 'Room Created - Waiting for players';
+        alert('Failed to initialize: ' + e.message);
     }
 }
 
-function updateJoinStatus(status, msg = '') {
-    const indicator = document.getElementById('join-status');
-    const text = document.getElementById('join-status-text');
-    const error = document.getElementById('join-error');
-    
-    indicator.className = 'status-indicator';
-    error.classList.add('hidden');
-    
-    if(status === 'offline') {
-        indicator.classList.add('status-offline');
-        text.innerText = 'Offline';
-    } else if(status === 'connecting') {
-        indicator.classList.add('status-connecting');
-        text.innerText = 'Connecting...';
-    } else if(status === 'online') {
-        indicator.classList.add('status-online');
-        text.innerText = 'Connected!';
-    } else if(status === 'error') {
-        indicator.classList.add('status-offline');
-        text.innerText = 'Error';
-        error.innerText = msg;
-        error.classList.remove('hidden');
-    }
-}
+// ==================== WEBRTC SIGNALING ====================
 
-// ==================== WEBRTC P2P NETWORKING ====================
-
-// Using public STUN servers for NAT traversal
 const iceServers = {
     iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' }
+        { urls: 'stun:stun1.l.google.com:19302' }
     ]
 };
 
-function createRoom() {
-    isHost = true;
-    myPlayerId = 0;
-    updateHostStatus('connecting');
+// HOST: Create offer
+async function createHostOffer() {
+    updateHostStatus('connecting', 'Creating offer...');
     
-    peerConnection = new RTCPeerConnection(iceServers);
+    pc = new RTCPeerConnection(iceServers);
     
-    // Create data channel
-    dataChannel = peerConnection.createDataChannel('game', {
-        ordered: true
-    });
+    dc = pc.createDataChannel('game', { ordered: true });
+    setupDataChannel(dc);
     
-    setupDataChannel(dataChannel);
-    
-    // Handle ICE candidates
-    peerConnection.onicecandidate = event => {
-        if(event.candidate) {
-            // In real app, send this to peer via signaling server
-            // For local network, we collect all candidates
+    pc.onicecandidate = (e) => {
+        if(!e.candidate) {
+            // All candidates gathered
+            const offer = btoa(JSON.stringify(pc.localDescription));
+            document.getElementById('host-offer').innerText = offer;
+            updateHostStatus('connecting', 'Offer created! Send to friend.');
+            document.getElementById('create-offer-btn').disabled = true;
         }
     };
     
-    // Create offer
-    peerConnection.createOffer()
-        .then(offer => peerConnection.setLocalDescription(offer))
-        .then(() => {
-            // Display the offer for copy-paste signaling
-            const offerCode = btoa(JSON.stringify(peerConnection.localDescription));
-            document.getElementById('host-code').innerText = offerCode;
-            updateHostStatus('online');
-            document.getElementById('create-btn').classList.add('hidden');
-            document.getElementById('start-btn').classList.remove('hidden');
-            
-            // Also set up to receive answer
-            window.currentOffer = peerConnection.localDescription;
-        })
-        .catch(err => {
-            console.error(err);
-            updateHostStatus('offline');
-            alert('Failed to create room: ' + err.message);
-        });
-    
-    // Handle connection
-    peerConnection.ondatachannel = event => {
-        const channel = event.channel;
-        setupDataChannel(channel);
-    };
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
 }
 
-function joinRoom() {
-    const code = document.getElementById('join-code').value.trim();
-    if(!code) {
-        updateJoinStatus('error', 'Please enter a room code');
+// HOST: Accept answer
+async function hostAcceptAnswer() {
+    const answerStr = document.getElementById('host-answer-input').value.trim();
+    if(!answerStr) {
+        alert('Please paste answer code!');
         return;
     }
     
-    isHost = false;
-    updateJoinStatus('connecting');
-    
     try {
-        const offer = JSON.parse(atob(code));
+        const answer = JSON.parse(atob(answerStr));
+        await pc.setRemoteDescription(answer);
+        updateHostStatus('connected', 'Connected! Starting game...');
         
-        peerConnection = new RTCPeerConnection(iceServers);
+        isHost = true;
+        myId = 0;
         
-        peerConnection.ondatachannel = event => {
-            dataChannel = event.channel;
-            setupDataChannel(dataChannel);
-        };
-        
-        peerConnection.setRemoteDescription(offer)
-            .then(() => peerConnection.createAnswer())
-            .then(answer => peerConnection.setLocalDescription(answer))
-            .then(() => {
-                // Display answer for host
-                const answerCode = btoa(JSON.stringify(peerConnection.localDescription));
-                alert('Copy this answer code and send to host:\n\n' + answerCode.substring(0, 100) + '...');
-                
-                // Wait for host to input answer
-                const hostAnswer = prompt('Paste host answer code:');
-                if(hostAnswer) {
-                    const answer = JSON.parse(atob(hostAnswer));
-                    peerConnection.setRemoteDescription(answer);
-                }
-            });
-            
+        setTimeout(startGame, 500);
     } catch(e) {
-        updateJoinStatus('error', 'Invalid room code');
-        console.error(e);
+        alert('Invalid answer code: ' + e.message);
     }
 }
 
-// For host to accept answer
-function acceptAnswer() {
-    const answerCode = prompt('Paste the answer code from joining player:');
-    if(!answerCode) return;
+// JOIN: Create answer
+async function createJoinAnswer() {
+    const offerStr = document.getElementById('join-offer-input').value.trim();
+    if(!offerStr) {
+        alert('Please paste offer code!');
+        return;
+    }
+    
+    updateJoinStatus('connecting', 'Creating answer...');
     
     try {
-        const answer = JSON.parse(atob(answerCode));
-        peerConnection.setRemoteDescription(answer);
+        const offer = JSON.parse(atob(offerStr));
+        
+        pc = new RTCPeerConnection(iceServers);
+        
+        pc.ondatachannel = (e) => {
+            dc = e.channel;
+            setupDataChannel(dc);
+        };
+        
+        await pc.setRemoteDescription(offer);
+        
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        
+        pc.onicecandidate = (e) => {
+            if(!e.candidate) {
+                const answerStr = btoa(JSON.stringify(pc.localDescription));
+                document.getElementById('join-answer').innerText = answerStr;
+                document.getElementById('join-answer-box').classList.remove('hidden');
+                updateJoinStatus('connecting', 'Answer created! Send to host and wait...');
+                
+                // Wait for connection
+                waitForConnection();
+            }
+        };
+        
     } catch(e) {
-        alert('Invalid answer code');
+        alert('Failed: ' + e.message);
+        updateJoinStatus('error', 'Failed to create answer');
     }
+}
+
+function waitForConnection() {
+    const check = setInterval(() => {
+        if(dc && dc.readyState === 'open') {
+            clearInterval(check);
+            isHost = false;
+            myId = 1;
+            startGame();
+        }
+    }, 100);
 }
 
 function setupDataChannel(channel) {
     channel.onopen = () => {
-        console.log('Data channel open!');
-        connected = true;
-        
-        if(isHost) {
-            document.getElementById('connected-players').innerText = '1 player connected';
-        } else {
-            updateJoinStatus('online');
-            // Request to join game
-            sendMessage({ type: 'join', name: 'Player ' + Math.floor(Math.random() * 1000) });
-        }
+        console.log('🎮 Data channel OPEN!');
+        updateHostStatus('connected', 'Connected!');
+        updateJoinStatus('connected', 'Connected!');
     };
     
-    channel.onmessage = event => {
-        const msg = JSON.parse(event.data);
-        handleNetworkMessage(msg);
+    channel.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        handleMessage(msg);
     };
     
-    channel.onclose = () => {
-        console.log('Data channel closed');
-        connected = false;
-    };
+    channel.onclose = () => console.log('Channel closed');
+    channel.onerror = (e) => console.error('Channel error:', e);
 }
 
-function sendMessage(msg) {
-    if(dataChannel && dataChannel.readyState === 'open') {
-        dataChannel.send(JSON.stringify(msg));
+function send(msg) {
+    if(dc && dc.readyState === 'open') {
+        dc.send(JSON.stringify(msg));
     }
 }
 
-function handleNetworkMessage(msg) {
+// ==================== GAME ====================
+
+function handleMessage(msg) {
     switch(msg.type) {
-        case 'join':
-            if(isHost) {
-                const newId = players.size + 1;
-                sendMessage({ type: 'welcome', id: newId, hostId: myPlayerId });
-                addRemotePlayer(newId);
-            }
-            break;
-        case 'welcome':
-            myPlayerId = msg.id;
-            addLocalPlayer();
-            addRemotePlayer(msg.hostId);
-            break;
         case 'playerState':
-            updateRemotePlayer(msg.id, msg.data);
+            updateRemotePlayer(msg.data);
             break;
         case 'attack':
-            handleRemoteAttack(msg.id, msg.data);
+            handleRemoteAttack(msg);
             break;
         case 'damage':
-            applyDamage(msg.target, msg.damage, msg.source);
+            if(msg.target === myId) takeDamage(msg.damage, msg.source);
             break;
         case 'death':
             handleRemoteDeath(msg.id, msg.killer);
             break;
-        case 'startGame':
-            startGame();
-            break;
     }
 }
 
-// ==================== PLAYER SYSTEM ====================
-
-function addLocalPlayer() {
-    localPlayer = createPlayerObject(myPlayerId, true);
-    players.set(myPlayerId, localPlayer);
+function startGame() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('game-hud').classList.remove('hidden');
+    
+    // Create players
+    createPlayer(myId, true); // Local
+    
+    const otherId = myId === 0 ? 1 : 0;
+    createPlayer(otherId, false); // Remote
+    
+    gameActive = true;
+    createHUD();
+    animate();
 }
 
-function addRemotePlayer(id) {
-    if(!players.has(id)) {
-        const player = createPlayerObject(id, false);
-        players.set(id, player);
-    }
-}
-
-function createPlayerObject(id, isLocal) {
+function createPlayer(id, isLocal) {
     const group = new THREE.Group();
-    const color = CONFIG.colors[id % CONFIG.colors.length];
+    const color = CONFIG.colors[id];
     
     // Body
-    const bodyGeo = new THREE.BoxGeometry(1, 1.2, 0.6);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: color });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    const body = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1.2, 0.6),
+        new THREE.MeshStandardMaterial({ color: color })
+    );
     body.position.y = 0.6;
     body.castShadow = true;
     group.add(body);
     
     // Head
-    const headGeo = new THREE.BoxGeometry(0.7, 0.7, 0.7);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const head = new THREE.Mesh(headGeo, headMat);
+    const head = new THREE.Mesh(
+        new THREE.BoxGeometry(0.7, 0.7, 0.7),
+        new THREE.MeshStandardMaterial({ color: 0xffffff })
+    );
     head.position.y = 1.6;
-    head.castShadow = true;
     group.add(head);
     
     // Eyes
-    const eyeGeo = new THREE.BoxGeometry(0.15, 0.15, 0.1);
     const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+    const leftEye = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.1), eyeMat);
     leftEye.position.set(-0.15, 1.6, 0.4);
     group.add(leftEye);
-    const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+    const rightEye = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.15, 0.1), eyeMat);
     rightEye.position.set(0.15, 1.6, 0.4);
     group.add(rightEye);
     
     // Arms
-    const armGeo = new THREE.BoxGeometry(0.25, 0.9, 0.25);
-    const leftArm = new THREE.Mesh(armGeo, bodyMat);
+    const armMat = new THREE.MeshStandardMaterial({ color: color });
+    const leftArm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.9, 0.25), armMat);
     leftArm.position.set(-0.7, 0.8, 0);
     group.add(leftArm);
     
     const rightArmGroup = new THREE.Group();
     rightArmGroup.position.set(0.7, 1.2, 0);
-    const rightArm = new THREE.Mesh(armGeo, bodyMat);
+    const rightArm = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.9, 0.25), armMat);
     rightArm.position.set(0, -0.4, 0);
     rightArmGroup.add(rightArm);
     group.add(rightArmGroup);
     
     // Weapon
-    const weaponGeo = new THREE.BoxGeometry(0.1, 1.4, 0.1);
-    const weaponMat = new THREE.MeshStandardMaterial({ color: 0xcccccc });
-    const weapon = new THREE.Mesh(weaponGeo, weaponMat);
+    const weapon = new THREE.Mesh(
+        new THREE.BoxGeometry(0.1, 1.4, 0.1),
+        new THREE.MeshStandardMaterial({ color: 0xcccccc })
+    );
     weapon.position.set(0, -0.5, 0.3);
     weapon.rotation.x = Math.PI / 2;
     weapon.visible = false;
@@ -774,76 +656,33 @@ function createPlayerObject(id, isLocal) {
     ctx.fillStyle = '#' + color.toString(16).padStart(6, '0');
     ctx.font = 'bold 16px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('P' + (id + 1), 64, 22);
+    ctx.fillText('P' + (id + 1) + (isLocal ? ' (YOU)' : ''), 64, 22);
     
-    const tex = new THREE.CanvasTexture(canvas);
-    const spriteMat = new THREE.SpriteMaterial({ map: tex });
-    const sprite = new THREE.Sprite(spriteMat);
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ 
+        map: new THREE.CanvasTexture(canvas) 
+    }));
     sprite.position.y = 2.5;
-    sprite.scale.set(1.5, 0.4, 1);
+    sprite.scale.set(2, 0.5, 1);
     group.add(sprite);
     
     scene.add(group);
     
-    // Random spawn
-    const angle = (Math.PI * 2 / 4) * id;
-    group.position.set(Math.cos(angle) * 20, 10, Math.sin(angle) * 20);
+    // Spawn position
+    const angle = id === 0 ? 0 : Math.PI;
+    group.position.set(Math.cos(angle) * 15, 10, Math.sin(angle) * 15);
     
-    return {
-        id: id,
-        mesh: group,
-        isLocal: isLocal,
-        hp: 100,
-        maxHp: 100,
-        deaths: 0,
-        ultimateCharge: 0,
-        isDead: false,
-        velocity: new THREE.Vector3(),
-        speed: 0,
-        isJumping: false,
-        isAttacking: false,
-        attackCooldown: 0,
-        rightArm: rightArmGroup,
-        weapon: weapon,
-        color: color
+    const player = {
+        id, mesh: group, isLocal, hp: 100, maxHp: 100,
+        deaths: 0, ultimateCharge: 0, isDead: false,
+        velocity: new THREE.Vector3(), speed: 0,
+        isJumping: false, isAttacking: false, attackCooldown: 0,
+        rightArm: rightArmGroup, weapon, color
     };
-}
-
-function updateRemotePlayer(id, data) {
-    const player = players.get(id);
-    if(player && !player.isLocal) {
-        player.mesh.position.set(data.x, data.y, data.z);
-        player.mesh.rotation.y = data.rot;
-        player.hp = data.hp;
-        player.deaths = data.deaths;
-        
-        if(data.attacking) {
-            player.weapon.visible = true;
-            player.rightArm.rotation.x = -Math.PI / 2;
-        } else {
-            player.rightArm.rotation.x = 0;
-        }
-    }
-}
-
-// ==================== GAME LOOP ====================
-
-function startHostedGame() {
-    sendMessage({ type: 'startGame' });
-    startGame();
-}
-
-function startGame() {
-    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-    document.getElementById('game-hud').classList.remove('hidden');
     
-    if(!localPlayer) {
-        addLocalPlayer();
-    }
+    players.set(id, player);
+    if(isLocal) localPlayer = player;
     
-    gameActive = true;
-    createHUD();
-    animate();
+    return player;
 }
 
 function createHUD() {
@@ -856,10 +695,18 @@ function createHUD() {
         card.id = 'card-' + p.id;
         card.style.borderColor = '#' + p.color.toString(16).padStart(6, '0');
         card.innerHTML = `
-            <div class="player-name" style="color: #${p.color.toString(16).padStart(6, '0')}">P${p.id + 1} ${p.isLocal ? '(YOU)' : ''}</div>
-            <div class="hp-bar"><div class="hp-fill" id="hp-${p.id}" style="width: 100%; background: #${p.color.toString(16).padStart(6, '0')}"></div></div>
-            <div class="ultimate-bar"><div class="ultimate-fill" id="ult-${p.id}"></div></div>
-            <div class="deaths" id="deaths-${p.id}">Deaths: 0/5</div>
+            <div style="font-size: 0.75rem; color: #${p.color.toString(16).padStart(6, '0')}; font-weight: bold;">
+                P${p.id + 1} ${p.isLocal ? '(YOU)' : ''}
+            </div>
+            <div class="hp-bar">
+                <div class="hp-fill" id="hp-${p.id}" style="width: 100%; background: #${p.color.toString(16).padStart(6, '0')}"></div>
+            </div>
+            <div class="ult-bar">
+                <div class="ult-fill" id="ult-${p.id}"></div>
+            </div>
+            <div style="font-size: 0.6rem; color: #ef4444; margin-top: 6px;">
+                💀 <span id="deaths-${p.id}">0</span>/5
+            </div>
         `;
         container.appendChild(card);
     });
@@ -870,20 +717,21 @@ function updateHUD() {
         const hpBar = document.getElementById('hp-' + p.id);
         const ultBar = document.getElementById('ult-' + p.id);
         const deaths = document.getElementById('deaths-' + p.id);
-        const card = document.getElementById('card-' + p.id);
         
         if(hpBar) hpBar.style.width = (p.hp / p.maxHp * 100) + '%';
-        if(ultBar) ultBar.style.width = (p.ultimateCharge / CONFIG.ultimateDeaths * 100) + '%';
-        if(deaths) deaths.innerText = `Deaths: ${p.deaths}/${CONFIG.maxDeaths}`;
+        if(ultBar) ultBar.style.width = Math.min(p.ultimateCharge / CONFIG.ultimateDeaths * 100, 100) + '%';
+        if(deaths) deaths.innerText = p.deaths;
         
-        if(p.isDead && card) {
-            card.style.opacity = '0.3';
-        } else if(card) {
-            card.style.opacity = '1';
-        }
-        
-        if(p.ultimateCharge >= CONFIG.ultimateDeaths && card && p.isLocal) {
-            card.style.boxShadow = '0 0 20px #fbbf24';
+        const card = document.getElementById('card-' + p.id);
+        if(card) {
+            if(p.isDead) card.style.opacity = '0.4';
+            else card.style.opacity = '1';
+            
+            if(p.ultimateCharge >= CONFIG.ultimateDeaths && p.isLocal) {
+                card.style.boxShadow = '0 0 30px #fbbf24';
+            } else {
+                card.style.boxShadow = 'none';
+            }
         }
     });
 }
@@ -900,15 +748,17 @@ function generateChunk(cx, cz) {
     geometry.rotateX(-Math.PI / 2);
     
     const pos = geometry.attributes.position;
-    for(let i=0; i<pos.count; i++) {
+    for(let i = 0; i < pos.count; i++) {
         const wx = pos.getX(i) + (cx * CONFIG.chunkSize);
         const wz = pos.getZ(i) + (cz * CONFIG.chunkSize);
         pos.setY(i, getTerrainHeight(wx, wz));
     }
     geometry.computeVertexNormals();
 
-    const material = new THREE.MeshStandardMaterial({ color: 0x3a5f0b, flatShading: true });
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Mesh(
+        geometry,
+        new THREE.MeshStandardMaterial({ color: 0x3a5f0b, flatShading: true })
+    );
     mesh.position.set(cx * CONFIG.chunkSize, 0, cz * CONFIG.chunkSize);
     mesh.receiveShadow = true;
     
@@ -916,42 +766,42 @@ function generateChunk(cx, cz) {
     chunks.set(key, mesh);
 }
 
-// ==================== UPDATE ====================
-
 function update(dt) {
     if(!gameActive) return;
     
-    // Update local player
+    // Update local
     if(localPlayer && !localPlayer.isDead) {
         updateLocalPlayer(dt);
     }
     
-    // Camera follows local player
+    // Camera
     if(localPlayer) {
         const target = localPlayer.mesh.position.clone();
-        target.y += 15;
-        const offset = new THREE.Vector3(0, 10, -20).applyAxisAngle(new THREE.Vector3(0,1,0), localPlayer.mesh.rotation.y);
+        const offset = new THREE.Vector3(0, 12, -20).applyAxisAngle(
+            new THREE.Vector3(0, 1, 0), 
+            localPlayer.mesh.rotation.y
+        );
         camera.position.lerp(target.add(offset), 0.1);
         camera.lookAt(localPlayer.mesh.position);
     }
     
-    // Update chunks
+    // Chunks
     if(localPlayer) {
         const cx = Math.floor(localPlayer.mesh.position.x / CONFIG.chunkSize);
         const cz = Math.floor(localPlayer.mesh.position.z / CONFIG.chunkSize);
-        for(let x=cx-2; x<=cx+2; x++) {
-            for(let z=cz-2; z<=cz+2; z++) {
+        for(let x = cx - 2; x <= cx + 2; x++) {
+            for(let z = cz - 2; z <= cz + 2; z++) {
                 generateChunk(x, z);
             }
         }
     }
     
-    // Send network update
-    if(localPlayer && Math.random() < 0.3) { // 10fps network update
-        sendMessage({
+    // Network sync
+    if(localPlayer && Math.random() < 0.3) {
+        send({
             type: 'playerState',
-            id: myPlayerId,
             data: {
+                id: myId,
                 x: localPlayer.mesh.position.x,
                 y: localPlayer.mesh.position.y,
                 z: localPlayer.mesh.position.z,
@@ -969,22 +819,19 @@ function update(dt) {
 function updateLocalPlayer(dt) {
     const p = localPlayer;
     
-    // Movement
-    let moving = false;
+    // Move
     const targetSpeed = keys['ShiftLeft'] ? CONFIG.playerRunSpeed : CONFIG.playerSpeed;
     
     if(keys['KeyW'] || keys['ArrowUp']) {
-        p.speed = Math.min(p.speed + 50*dt, targetSpeed);
-        moving = true;
+        p.speed = Math.min(p.speed + 50 * dt, targetSpeed);
     } else if(keys['KeyS'] || keys['ArrowDown']) {
-        p.speed = Math.max(p.speed - 50*dt, -targetSpeed*0.5);
-        moving = true;
+        p.speed = Math.max(p.speed - 50 * dt, -targetSpeed * 0.5);
     } else {
-        p.speed = THREE.MathUtils.lerp(p.speed, 0, 10*dt);
+        p.speed = THREE.MathUtils.lerp(p.speed, 0, 10 * dt);
     }
     
-    if(keys['KeyA'] || keys['ArrowLeft']) p.mesh.rotation.y += 3*dt;
-    if(keys['KeyD'] || keys['ArrowRight']) p.mesh.rotation.y -= 3*dt;
+    if(keys['KeyA'] || keys['ArrowLeft']) p.mesh.rotation.y += 3 * dt;
+    if(keys['KeyD'] || keys['ArrowRight']) p.mesh.rotation.y -= 3 * dt;
     
     p.velocity.x = Math.sin(p.mesh.rotation.y) * p.speed;
     p.velocity.z = Math.cos(p.mesh.rotation.y) * p.speed;
@@ -995,7 +842,7 @@ function updateLocalPlayer(dt) {
     // Physics
     const groundH = getTerrainHeight(p.mesh.position.x, p.mesh.position.z);
     
-    if((keys['Space'] || keys['Numpad0']) && !p.isJumping) {
+    if((keys['Space']) && !p.isJumping) {
         p.velocity.y = CONFIG.jumpForce;
         p.isJumping = true;
     }
@@ -1012,23 +859,22 @@ function updateLocalPlayer(dt) {
         p.mesh.position.y = groundH + 1.1;
     }
     
-    // Attack
+    // Combat
     if(p.attackCooldown > 0) p.attackCooldown -= dt;
     
     if((keys['KeyF'] || mouse.down) && p.attackCooldown <= 0 && !p.isAttacking) {
-        performAttack();
+        doAttack();
         keys['KeyF'] = false;
         mouse.down = false;
     }
     
-    // Ultimate
     if((keys['KeyG'] || mouse.rightDown) && p.ultimateCharge >= CONFIG.ultimateDeaths) {
-        performUltimate();
+        doUltimate();
         keys['KeyG'] = false;
         mouse.rightDown = false;
     }
     
-    // Animation
+    // Animate
     if(Math.abs(p.speed) > 1) {
         const time = Date.now() * 0.01;
         p.mesh.children[2].rotation.x = Math.sin(time) * 0.5;
@@ -1036,21 +882,21 @@ function updateLocalPlayer(dt) {
             p.rightArm.rotation.x = Math.sin(time + Math.PI) * 0.5;
         }
     } else if(!p.isAttacking) {
-        p.rightArm.rotation.x = 0;
+        p.rightArm.rotation.x = THREE.MathUtils.lerp(p.rightArm.rotation.x, 0, dt * 10);
     }
 }
 
-function performAttack() {
+function doAttack() {
     const p = localPlayer;
     p.isAttacking = true;
     p.attackCooldown = 0.4;
     p.weapon.visible = true;
     
-    // Animation
+    // Swing
     let swing = 0;
     const anim = setInterval(() => {
-        swing += 0.3;
-        p.rightArm.rotation.x = -Math.PI/2 + Math.sin(swing) * 0.5;
+        swing += 0.4;
+        p.rightArm.rotation.x = -Math.PI / 2 + Math.sin(swing) * 0.5;
         if(swing > Math.PI) {
             clearInterval(anim);
             p.isAttacking = false;
@@ -1059,118 +905,129 @@ function performAttack() {
         }
     }, 16);
     
-    // Check hits
-    sendMessage({ type: 'attack', id: myPlayerId, data: { x: p.mesh.position.x, z: p.mesh.position.z, rot: p.mesh.rotation.y } });
+    send({ type: 'attack', data: { id: myId } });
     
-    // Local hit detection
-    players.forEach(target => {
-        if(target.id !== myPlayerId && !target.isDead) {
-            const dist = p.mesh.position.distanceTo(target.mesh.position);
-            if(dist < 3) {
-                const toTarget = new THREE.Vector3().subVectors(target.mesh.position, p.mesh.position).normalize();
-                const facing = new THREE.Vector3(Math.sin(p.mesh.rotation.y), 0, Math.cos(p.mesh.rotation.y));
-                if(facing.dot(toTarget) > 0.3) {
-                    sendMessage({ type: 'damage', target: target.id, damage: 20, source: myPlayerId });
-                }
+    // Hit check
+    const otherId = myId === 0 ? 1 : 0;
+    const other = players.get(otherId);
+    if(other && !other.isDead) {
+        const dist = p.mesh.position.distanceTo(other.mesh.position);
+        if(dist < 3) {
+            const toOther = new THREE.Vector3().subVectors(other.mesh.position, p.mesh.position).normalize();
+            const facing = new THREE.Vector3(Math.sin(p.mesh.rotation.y), 0, Math.cos(p.mesh.rotation.y));
+            if(facing.dot(toOther) > 0.3) {
+                send({ type: 'damage', target: otherId, damage: 20, source: myId });
             }
         }
-    });
+    }
 }
 
-function performUltimate() {
+function doUltimate() {
     const p = localPlayer;
     p.ultimateCharge = 0;
     
-    // AOE effect
-    sendMessage({ type: 'ultimate', id: myPlayerId, pos: { x: p.mesh.position.x, z: p.mesh.position.z } });
+    send({ type: 'attack', data: { id: myId, ultimate: true } });
     
-    players.forEach(target => {
-        if(target.id !== myPlayerId && !target.isDead) {
-            const dist = p.mesh.position.distanceTo(target.mesh.position);
-            if(dist < 10) {
-                sendMessage({ type: 'damage', target: target.id, damage: 40, source: myPlayerId });
-            }
+    // AOE
+    const otherId = myId === 0 ? 1 : 0;
+    const other = players.get(otherId);
+    if(other && !other.isDead) {
+        const dist = p.mesh.position.distanceTo(other.mesh.position);
+        if(dist < 10) {
+            send({ type: 'damage', target: otherId, damage: 40, source: myId });
         }
-    });
+    }
     
-    // Visual
-    createExplosion(p.mesh.position, 0xfbbf24, 20);
-    addKillFeed('P' + (myPlayerId + 1) + ' used ULTIMATE!');
+    addKillFeed('P' + (myId + 1) + ' used ULTIMATE! ⚡');
 }
 
-function applyDamage(targetId, damage, sourceId) {
-    const target = players.get(targetId);
-    if(!target || target.isDead) return;
+function takeDamage(damage, source) {
+    const p = localPlayer;
+    p.hp -= damage;
     
-    target.hp -= damage;
-    
-    // Flash effect
-    target.mesh.children[0].material.emissive.setHex(0xffffff);
-    target.mesh.children[0].material.emissiveIntensity = 0.5;
+    // Flash
+    p.mesh.children[0].material.emissive.setHex(0xff0000);
+    p.mesh.children[0].material.emissiveIntensity = 0.8;
     setTimeout(() => {
-        target.mesh.children[0].material.emissive.setHex(0x000000);
-        target.mesh.children[0].material.emissiveIntensity = 0;
+        p.mesh.children[0].material.emissive.setHex(0x000000);
+        p.mesh.children[0].material.emissiveIntensity = 0;
     }, 100);
     
-    if(target.hp <= 0) {
-        handleDeath(target, sourceId);
+    if(p.hp <= 0) {
+        die(source);
     }
 }
 
-function handleDeath(player, killerId) {
-    player.deaths++;
-    player.ultimateCharge = Math.min(player.ultimateCharge + 1, CONFIG.ultimateDeaths);
+function die(killerId) {
+    const p = localPlayer;
+    p.deaths++;
+    p.ultimateCharge = Math.min(p.ultimateCharge + 1, CONFIG.ultimateDeaths);
     
-    const killer = players.get(killerId);
-    if(killer) {
-        killer.kills = (killer.kills || 0) + 1;
-        killer.ultimateCharge = Math.min(killer.ultimateCharge + 0.5, CONFIG.ultimateDeaths);
-    }
+    send({ type: 'death', id: myId, killer: killerId });
     
-    addKillFeed('P' + (killerId + 1) + ' killed P' + (player.id + 1));
+    addKillFeed('P' + (killerId + 1) + ' killed P' + (myId + 1) + '!');
     
-    if(player.deaths >= CONFIG.maxDeaths) {
-        player.isDead = true;
-        player.mesh.visible = false;
-        addKillFeed('P' + (player.id + 1) + ' ELIMINATED!');
+    if(p.deaths >= CONFIG.maxDeaths) {
+        p.isDead = true;
+        p.mesh.visible = false;
+        addKillFeed('P' + (myId + 1) + ' ELIMINATED! 💀');
         checkWinner();
     } else {
         // Respawn
         setTimeout(() => {
-            player.hp = player.maxHp;
+            p.hp = p.maxHp;
             const angle = Math.random() * Math.PI * 2;
-            player.mesh.position.set(Math.cos(angle) * 30, 15, Math.sin(angle) * 30);
+            p.mesh.position.set(Math.cos(angle) * 25, 15, Math.sin(angle) * 25);
+            p.mesh.visible = true;
         }, 2000);
     }
+}
+
+function handleRemoteDeath(id, killerId) {
+    const p = players.get(id);
+    if(!p) return;
     
-    if(player.isLocal) {
-        sendMessage({ type: 'death', id: player.id, killer: killerId });
+    p.deaths++;
+    addKillFeed('P' + (killerId + 1) + ' killed P' + (id + 1) + '!');
+    
+    if(p.deaths >= CONFIG.maxDeaths) {
+        p.isDead = true;
+        p.mesh.visible = false;
+        addKillFeed('P' + (id + 1) + ' ELIMINATED! 💀');
+        checkWinner();
     }
 }
 
 function checkWinner() {
     const alive = Array.from(players.values()).filter(p => !p.isDead);
-    if(alive.length === 1 && players.size > 1) {
+    if(alive.length === 1) {
         gameActive = false;
-        document.getElementById('game-hud').classList.add('hidden');
-        document.getElementById('game-over').classList.remove('hidden');
-        document.getElementById('winner-title').innerText = 'P' + (alive[0].id + 1) + ' WINS!';
+        setTimeout(() => {
+            document.getElementById('game-hud').classList.add('hidden');
+            document.getElementById('game-over').classList.remove('hidden');
+            const winner = alive[0];
+            document.getElementById('winner-title').innerText = 'P' + (winner.id + 1) + ' WINS!';
+            document.getElementById('winner-title').style.color = '#' + winner.color.toString(16).padStart(6, '0');
+            document.getElementById('winner-subtitle').innerText = winner.isLocal ? 'Victory!' : 'Defeat!';
+        }, 1000);
     }
 }
 
-function createExplosion(pos, color, count) {
-    for(let i=0; i<count; i++) {
-        const geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-        const mat = new THREE.MeshBasicMaterial({ color: color });
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.copy(pos);
-        scene.add(mesh);
-        
-        particles.push({
-            mesh: mesh,
-            vel: new THREE.Vector3((Math.random()-0.5)*10, Math.random()*10, (Math.random()-0.5)*10),
-            life: 1.0
-        });
+function updateRemotePlayer(data) {
+    const p = players.get(data.id);
+    if(!p || p.isLocal) return;
+    
+    p.mesh.position.set(data.x, data.y, data.z);
+    p.mesh.rotation.y = data.rot;
+    p.hp = data.hp;
+    p.deaths = data.deaths;
+    
+    if(data.attacking) {
+        p.weapon.visible = true;
+        p.rightArm.rotation.x = -Math.PI / 2;
+    } else {
+        p.weapon.visible = false;
+        p.rightArm.rotation.x = 0;
     }
 }
 
@@ -1178,40 +1035,56 @@ function addKillFeed(msg) {
     const feed = document.getElementById('kill-feed');
     const el = document.createElement('div');
     el.className = 'kill-msg';
-    el.innerText = msg;
+    el.innerHTML = msg;
     feed.appendChild(el);
-    setTimeout(() => el.remove(), 3000);
+    if(feed.children.length > 5) feed.removeChild(feed.firstChild);
+    setTimeout(() => el.remove(), 4000);
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    
-    const dt = Math.min(clock.getDelta(), 0.1);
-    update(dt);
-    
-    // Update particles
-    for(let i=particles.length-1; i>=0; i--) {
-        const p = particles[i];
-        p.life -= dt;
-        p.mesh.position.add(p.vel.clone().multiplyScalar(dt));
-        p.vel.y -= 20 * dt;
-        if(p.life <= 0) {
-            scene.remove(p.mesh);
-            particles.splice(i, 1);
-        }
-    }
-    
+    update(clock.getDelta());
     renderer.render(scene, camera);
 }
 
-function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+// ==================== UI HELPERS ====================
+
+function startHost() {
+    document.getElementById('menu-screen').classList.add('hidden');
+    document.getElementById('host-screen').classList.remove('hidden');
+}
+
+function startJoin() {
+    document.getElementById('menu-screen').classList.add('hidden');
+    document.getElementById('join-screen').classList.remove('hidden');
+}
+
+function backToMenu() {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    document.getElementById('menu-screen').classList.remove('hidden');
+}
+
+function updateHostStatus(type, text) {
+    const dot = document.getElementById('host-status-dot');
+    dot.className = 'status-dot ' + (type === 'connected' ? 'connected' : type === 'connecting' ? 'connecting' : '');
+    document.getElementById('host-status-text').innerText = text;
+}
+
+function updateJoinStatus(type, text) {
+    const dot = document.getElementById('join-status-dot');
+    dot.className = 'status-dot ' + (type === 'connected' ? 'connected' : type === 'connecting' ? 'connecting' : '');
+    document.getElementById('join-status-text').innerText = text;
+}
+
+function copyToClipboard(el) {
+    navigator.clipboard.writeText(el.innerText).then(() => {
+        el.style.background = '#1a3a1a';
+        setTimeout(() => el.style.background = '#000', 200);
+    });
 }
 
 // Start
-window.onload = init;
+init();
 
 </script>
 </body>
