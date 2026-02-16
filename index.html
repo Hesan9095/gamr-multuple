@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voxel Arena - P2P Battle</title>
+    <title>Voxel Arena - Working Version</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         
@@ -23,6 +22,7 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: 1;
+            display: block;
         }
         
         .screen {
@@ -41,7 +41,7 @@
         .hidden { display: none !important; }
         
         .title {
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: #fbbf24;
             text-shadow: 0 0 20px #fbbf24, 4px 4px 0 #000;
             margin-bottom: 10px;
@@ -50,88 +50,55 @@
         
         .subtitle {
             color: #60a5fa;
-            font-size: 0.7rem;
-            margin-bottom: 40px;
+            font-size: 0.6rem;
+            margin-bottom: 30px;
             text-align: center;
-            line-height: 2;
+            line-height: 1.8;
         }
         
         .btn {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: #000;
             border: none;
-            padding: 20px 40px;
+            padding: 15px 30px;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.9rem;
             cursor: pointer;
             margin: 10px;
             border-radius: 10px;
-            box-shadow: 0 6px 0 #92400e, 0 0 20px rgba(251, 191, 36, 0.5);
+            box-shadow: 0 6px 0 #92400e;
             transition: all 0.1s;
             font-weight: bold;
         }
         
-        .btn:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 0 #92400e, 0 0 30px rgba(251, 191, 36, 0.8);
-        }
-        .btn:active { 
-            transform: translateY(4px); 
-            box-shadow: 0 2px 0 #92400e, 0 0 20px rgba(251, 191, 36, 0.5);
-        }
-        .btn.secondary { 
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
-            box-shadow: 0 6px 0 #1e40af, 0 0 20px rgba(59, 130, 246, 0.5);
-        }
-        .btn.secondary:active { box-shadow: 0 2px 0 #1e40af, 0 0 20px rgba(59, 130, 246, 0.5); }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #92400e; }
+        .btn.secondary { background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 6px 0 #1e40af; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
         
         .step-box {
             background: rgba(0,0,0,0.6);
             border: 2px solid #60a5fa;
             border-radius: 15px;
-            padding: 25px;
-            max-width: 700px;
+            padding: 20px;
+            max-width: 600px;
             width: 100%;
-            margin: 15px 0;
-        }
-        
-        .step-number {
-            display: inline-block;
-            width: 30px; height: 30px;
-            background: #fbbf24;
-            color: #000;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 30px;
-            font-size: 0.8rem;
-            margin-right: 10px;
+            margin: 10px 0;
         }
         
         .code-box {
             background: #000;
             border: 2px solid #22c55e;
             border-radius: 10px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.6rem;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.5rem;
             color: #22c55e;
             word-break: break-all;
-            max-height: 120px;
+            max-height: 100px;
             overflow-y: auto;
-            margin: 15px 0;
+            margin: 10px 0;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .code-box:hover {
-            border-color: #4ade80;
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
         }
         
         .code-input {
@@ -139,29 +106,28 @@
             background: #000;
             border: 2px solid #60a5fa;
             border-radius: 10px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.6rem;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.5rem;
             color: #fff;
-            min-height: 120px;
-            resize: vertical;
+            min-height: 100px;
         }
         
         .status {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin: 15px 0;
-            font-size: 0.7rem;
+            margin: 10px 0;
+            font-size: 0.6rem;
         }
         
         .status-dot {
-            width: 12px; height: 12px;
+            width: 10px; height: 10px;
             border-radius: 50%;
             background: #ef4444;
         }
         .status-dot.connecting { background: #fbbf24; animation: blink 1s infinite; }
-        .status-dot.connected { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+        .status-dot.connected { background: #22c55e; }
         
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         
@@ -181,33 +147,19 @@
         .player-card {
             background: rgba(0,0,0,0.85);
             border: 3px solid;
-            border-radius: 12px;
-            padding: 12px 18px;
-            min-width: 160px;
+            border-radius: 10px;
+            padding: 10px 15px;
+            min-width: 140px;
         }
         
         .hp-bar {
-            height: 10px;
+            height: 8px;
             background: #333;
-            border-radius: 5px;
+            border-radius: 4px;
             overflow: hidden;
-            margin-top: 8px;
+            margin-top: 5px;
         }
-        .hp-fill { height: 100%; transition: width 0.2s; }
-        
-        .ult-bar {
-            height: 6px;
-            background: #333;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 6px;
-        }
-        .ult-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #fbbf24, #f59e0b);
-            width: 0%;
-            transition: width 0.3s;
-        }
+        .hp-fill { height: 100%; }
         
         .kill-feed {
             position: fixed;
@@ -215,22 +167,16 @@
             right: 20px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 5px;
             z-index: 10;
         }
         
         .kill-msg {
             background: rgba(0,0,0,0.9);
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-size: 0.65rem;
-            border-left: 4px solid #ef4444;
-            animation: slideIn 0.4s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.6rem;
+            border-left: 3px solid #ef4444;
         }
         
         .controls-hint {
@@ -239,18 +185,23 @@
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.9);
-            padding: 15px 25px;
+            padding: 15px 20px;
             border-radius: 10px;
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             text-align: center;
-            line-height: 1.8;
+            line-height: 1.6;
             z-index: 10;
         }
         
-        .copy-hint {
-            color: #22c55e;
+        .error-message {
+            color: #ef4444;
             font-size: 0.6rem;
-            margin-top: 5px;
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -258,13 +209,16 @@
 
     <canvas id="game-canvas"></canvas>
 
+    <!-- Error Display -->
+    <div id="error-display" class="error-message hidden" style="position: fixed; top: 10px; left: 10px; right: 10px; z-index: 200;"></div>
+
     <!-- MAIN MENU -->
     <div id="menu-screen" class="screen">
         <div class="title">⚔️ VOXEL ARENA</div>
         <div class="subtitle">
-            P2P MULTIPLAYER BATTLE<br>
-            No server needed - Direct connection<br>
-            2 Players • 5 Deaths = Elimination • 3 Deaths = Ultimate
+            SYNCHRONIZED TERRAIN MULTIPLAYER<br>
+            Both players see the EXACT same world<br>
+            2 Players • 5 Deaths = Elimination
         </div>
         <button class="btn" onclick="startHost()">🎮 HOST GAME</button>
         <button class="btn secondary" onclick="startJoin()">🚀 JOIN GAME</button>
@@ -272,67 +226,57 @@
 
     <!-- HOST SCREEN -->
     <div id="host-screen" class="screen hidden">
-        <div class="title" style="font-size: 2rem;">HOST GAME</div>
+        <div class="title" style="font-size: 1.8rem;">HOST GAME</div>
         
         <div class="step-box">
-            <div style="margin-bottom: 15px;">
-                <span class="step-number">1</span>
-                <span style="color: #fbbf24;">Copy this OFFER code and send to friend:</span>
+            <div style="font-size: 0.7rem; margin-bottom: 10px;">
+                <span style="color: #fbbf24;">Step 1:</span> Copy this code and send to friend:
             </div>
-            <div class="code-box" id="host-offer" onclick="copyToClipboard(this)">
-                Click "CREATE OFFER" to generate code...
-            </div>
-            <div class="copy-hint">👆 Click to copy</div>
+            <div class="code-box" id="host-offer" onclick="copyText(this)">Click CREATE OFFER</div>
             <button class="btn" id="create-offer-btn" onclick="createHostOffer()">CREATE OFFER</button>
         </div>
         
         <div class="step-box">
-            <div style="margin-bottom: 15px;">
-                <span class="step-number">2</span>
-                <span style="color: #fbbf24;">Paste friend's ANSWER code here:</span>
+            <div style="font-size: 0.7rem; margin-bottom: 10px;">
+                <span style="color: #fbbf24;">Step 2:</span> Paste friend's answer:
             </div>
             <textarea class="code-input" id="host-answer-input" placeholder="Paste answer code here..."></textarea>
-            <button class="btn" onclick="hostAcceptAnswer()">CONNECT & START</button>
+            <button class="btn" onclick="hostAcceptAnswer()">START GAME</button>
         </div>
         
         <div class="status">
             <div class="status-dot" id="host-status-dot"></div>
-            <span id="host-status-text">Waiting...</span>
+            <span id="host-status-text">Ready</span>
         </div>
         
-        <button class="btn secondary" onclick="backToMenu()" style="margin-top: 20px;">BACK</button>
+        <button class="btn secondary" onclick="backToMenu()">BACK</button>
     </div>
 
     <!-- JOIN SCREEN -->
     <div id="join-screen" class="screen hidden">
-        <div class="title" style="font-size: 2rem;">JOIN GAME</div>
+        <div class="title" style="font-size: 1.8rem;">JOIN GAME</div>
         
         <div class="step-box">
-            <div style="margin-bottom: 15px;">
-                <span class="step-number">1</span>
-                <span style="color: #60a5fa;">Paste host's OFFER code:</span>
+            <div style="font-size: 0.7rem; margin-bottom: 10px;">
+                <span style="color: #60a5fa;">Step 1:</span> Paste host's code:
             </div>
             <textarea class="code-input" id="join-offer-input" placeholder="Paste offer code here..."></textarea>
             <button class="btn" onclick="createJoinAnswer()">CREATE ANSWER</button>
         </div>
         
         <div class="step-box hidden" id="join-answer-box">
-            <div style="margin-bottom: 15px;">
-                <span class="step-number">2</span>
-                <span style="color: #22c55e;">Copy this ANSWER code and send to host:</span>
+            <div style="font-size: 0.7rem; margin-bottom: 10px;">
+                <span style="color: #22c55e;">Step 2:</span> Copy this to host:
             </div>
-            <div class="code-box" id="join-answer" onclick="copyToClipboard(this)">
-                Generating...
-            </div>
-            <div class="copy-hint">👆 Click to copy, then wait for host to connect...</div>
+            <div class="code-box" id="join-answer" onclick="copyText(this)">...</div>
         </div>
         
         <div class="status">
             <div class="status-dot" id="join-status-dot"></div>
-            <span id="join-status-text">Enter offer code</span>
+            <span id="join-status-text">Enter code</span>
         </div>
         
-        <button class="btn secondary" onclick="backToMenu()" style="margin-top: 20px;">BACK</button>
+        <button class="btn secondary" onclick="backToMenu()">BACK</button>
     </div>
 
     <!-- GAME HUD -->
@@ -350,16 +294,63 @@
     <!-- GAME OVER -->
     <div id="game-over" class="screen hidden">
         <div class="title" id="winner-title">VICTORY!</div>
-        <div class="subtitle" id="winner-subtitle" style="color: #fbbf24; font-size: 1.2rem;">Player Wins!</div>
+        <div class="subtitle" id="winner-subtitle">Player Wins!</div>
         <button class="btn" onclick="location.reload()">PLAY AGAIN</button>
     </div>
 
 <script>
-/**
- * WORKING P2P MULTIPLAYER WITH MANUAL SIGNALING
- */
+// ==================== DETERMINISTIC RANDOM (No external lib) ====================
 
-// Game Config
+// Simple seeded random number generator
+function createSeededRandom(seed) {
+    let s = seed;
+    return function() {
+        s = Math.sin(s * 12.9898 + 78.233) * 43758.5453;
+        return s - Math.floor(s);
+    };
+}
+
+// Use fixed seed for terrain
+const TERRAIN_SEED = 12345;
+const seededRandom = createSeededRandom(TERRAIN_SEED);
+
+// Simplex-like noise using seeded random
+function createNoise() {
+    const perm = [];
+    for(let i = 0; i < 256; i++) perm[i] = Math.floor(seededRandom() * 256);
+    for(let i = 0; i < 256; i++) perm[256 + i] = perm[i];
+    
+    function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+    function lerp(t, a, b) { return a + t * (b - a); }
+    function grad(hash, x, y) {
+        const h = hash & 15;
+        const u = h < 8 ? x : y;
+        const v = h < 4 ? y : h === 12 || h === 14 ? x : 0;
+        return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+    }
+    
+    return {
+        noise2D: function(x, y) {
+            const X = Math.floor(x) & 255;
+            const Y = Math.floor(y) & 255;
+            
+            x -= Math.floor(x);
+            y -= Math.floor(y);
+            
+            const u = fade(x);
+            const v = fade(y);
+            
+            const A = perm[X] + Y;
+            const B = perm[X + 1] + Y;
+            
+            return lerp(v, lerp(u, grad(perm[A], x, y), grad(perm[B], x - 1, y)),
+                           lerp(u, grad(perm[A + 1], x, y - 1), grad(perm[B + 1], x - 1, y - 1)));
+        }
+    };
+}
+
+// ==================== CONFIG ====================
+
 const CONFIG = {
     chunkSize: 40,
     viewDistance: 3,
@@ -369,36 +360,63 @@ const CONFIG = {
     playerRunSpeed: 20,
     jumpForce: 15,
     gravity: 35,
-    colors: [0x3b82f6, 0xef4444]
+    colors: [0x3b82f6, 0xef4444],
+    mapSize: 80,
+    boundaryBuffer: 2
 };
 
-// Globals
-let scene, camera, renderer, simplex = new SimplexNoise();
+// ==================== GLOBALS ====================
+
+let scene = null, camera = null, renderer = null;
+let noise = null;
 let clock = new THREE.Clock();
 let chunks = new Map(), particles = [];
 let players = new Map(), localPlayer = null;
 let gameActive = false, myId = 0, isHost = false;
-
-// WebRTC
 let pc = null, dc = null;
-const keys = {}, mouse = { down: false, rightDown: false };
+let keys = {}, mouse = { down: false, rightDown: false };
 
-// Initialize Three.js
+// ==================== ERROR HANDLING ====================
+
+function showError(msg) {
+    console.error(msg);
+    const el = document.getElementById('error-display');
+    el.innerText = msg;
+    el.classList.remove('hidden');
+}
+
+window.onerror = function(msg, url, line) {
+    showError('Error: ' + msg + ' (Line ' + line + ')');
+};
+
+// ==================== INITIALIZATION ====================
+
 function init() {
     try {
+        console.log('Initializing...');
+        
+        // Create deterministic noise
+        noise = createNoise();
+        console.log('Noise created');
+        
+        // Three.js setup
+        const canvas = document.getElementById('game-canvas');
+        if(!canvas) throw new Error('Canvas not found');
+        
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
         scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+        console.log('Scene created');
 
         camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        renderer = new THREE.WebGLRenderer({ 
-            canvas: document.getElementById('game-canvas'), 
-            antialias: true 
-        });
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x87CEEB);
         renderer.shadowMap.enabled = true;
+        console.log('Renderer created');
 
+        // Lights
         const ambient = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambient);
         
@@ -406,14 +424,10 @@ function init() {
         dirLight.position.set(50, 100, 50);
         dirLight.castShadow = true;
         scene.add(dirLight);
+        console.log('Lights added');
 
         // Events
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-        
+        window.addEventListener('resize', onResize);
         document.addEventListener('keydown', e => keys[e.code] = true);
         document.addEventListener('keyup', e => keys[e.code] = false);
         document.addEventListener('mousedown', e => {
@@ -426,13 +440,108 @@ function init() {
         });
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        console.log('✅ Game initialized');
+        console.log('✅ Initialization complete');
+        
     } catch(e) {
-        alert('Failed to initialize: ' + e.message);
+        showError('Init failed: ' + e.message);
     }
 }
 
-// ==================== WEBRTC SIGNALING ====================
+function onResize() {
+    if(!camera || !renderer) return;
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// ==================== TERRAIN ====================
+
+function getTerrainHeight(x, z) {
+    // Round to avoid floating point issues
+    const rx = Math.round(x * 100) / 100;
+    const rz = Math.round(z * 100) / 100;
+    
+    // Check boundaries
+    const halfSize = CONFIG.mapSize / 2;
+    if(Math.abs(rx) > halfSize || Math.abs(rz) > halfSize) {
+        return -100;
+    }
+    
+    // Use deterministic noise
+    return noise.noise2D(rx * 0.02, rz * 0.02) * 5;
+}
+
+function createBoundaries() {
+    const halfSize = CONFIG.mapSize / 2;
+    
+    // Visual boundary lines
+    const lineMat = new THREE.MeshBasicMaterial({ 
+        color: 0xff0000, 
+        transparent: true, 
+        opacity: 0.3 
+    });
+    
+    const hLineGeo = new THREE.PlaneGeometry(CONFIG.mapSize, 2);
+    const vLineGeo = new THREE.PlaneGeometry(2, CONFIG.mapSize - 4);
+    
+    const positions = [
+        [0, 0.1, -halfSize + 1, hLineGeo],
+        [0, 0.1, halfSize - 1, hLineGeo],
+        [-halfSize + 1, 0.1, 0, vLineGeo],
+        [halfSize - 1, 0.1, 0, vLineGeo]
+    ];
+    
+    positions.forEach(([x, y, z, geo]) => {
+        const mesh = new THREE.Mesh(geo, lineMat);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(x, y, z);
+        scene.add(mesh);
+    });
+    
+    // Corner pillars
+    const pillarGeo = new THREE.CylinderGeometry(1, 1, 15, 8);
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
+    
+    const corners = [
+        [-halfSize + 2, -halfSize + 2],
+        [halfSize - 2, -halfSize + 2],
+        [-halfSize + 2, halfSize - 2],
+        [halfSize - 2, halfSize - 2]
+    ];
+    
+    corners.forEach(([x, z]) => {
+        const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+        pillar.position.set(x, 7.5, z);
+        pillar.castShadow = true;
+        scene.add(pillar);
+    });
+}
+
+function checkBoundaries(pos, radius) {
+    const halfSize = CONFIG.mapSize / 2 - CONFIG.boundaryBuffer;
+    let clamped = false;
+    const newPos = pos.clone();
+    
+    if(newPos.x < -halfSize + radius) {
+        newPos.x = -halfSize + radius;
+        clamped = true;
+    } else if(newPos.x > halfSize - radius) {
+        newPos.x = halfSize - radius;
+        clamped = true;
+    }
+    
+    if(newPos.z < -halfSize + radius) {
+        newPos.z = -halfSize + radius;
+        clamped = true;
+    } else if(newPos.z > halfSize - radius) {
+        newPos.z = halfSize - radius;
+        clamped = true;
+    }
+    
+    return { position: newPos, clamped };
+}
+
+// ==================== WEBRTC ====================
 
 const iceServers = {
     iceServers: [
@@ -441,30 +550,31 @@ const iceServers = {
     ]
 };
 
-// HOST: Create offer
 async function createHostOffer() {
-    updateHostStatus('connecting', 'Creating offer...');
+    updateStatus('host', 'connecting', 'Creating...');
     
-    pc = new RTCPeerConnection(iceServers);
-    
-    dc = pc.createDataChannel('game', { ordered: true });
-    setupDataChannel(dc);
-    
-    pc.onicecandidate = (e) => {
-        if(!e.candidate) {
-            // All candidates gathered
-            const offer = btoa(JSON.stringify(pc.localDescription));
-            document.getElementById('host-offer').innerText = offer;
-            updateHostStatus('connecting', 'Offer created! Send to friend.');
-            document.getElementById('create-offer-btn').disabled = true;
-        }
-    };
-    
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
+    try {
+        pc = new RTCPeerConnection(iceServers);
+        dc = pc.createDataChannel('game', { ordered: true });
+        setupDataChannel(dc);
+        
+        pc.onicecandidate = (e) => {
+            if(!e.candidate && pc.localDescription) {
+                const offer = btoa(JSON.stringify(pc.localDescription));
+                document.getElementById('host-offer').innerText = offer;
+                updateStatus('host', 'connecting', 'Offer ready! Send to friend.');
+                document.getElementById('create-offer-btn').disabled = true;
+            }
+        };
+        
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        
+    } catch(e) {
+        showError('Failed to create offer: ' + e.message);
+    }
 }
 
-// HOST: Accept answer
 async function hostAcceptAnswer() {
     const answerStr = document.getElementById('host-answer-input').value.trim();
     if(!answerStr) {
@@ -475,18 +585,17 @@ async function hostAcceptAnswer() {
     try {
         const answer = JSON.parse(atob(answerStr));
         await pc.setRemoteDescription(answer);
-        updateHostStatus('connected', 'Connected! Starting game...');
+        updateStatus('host', 'connected', 'Connected!');
         
         isHost = true;
         myId = 0;
         
         setTimeout(startGame, 500);
     } catch(e) {
-        alert('Invalid answer code: ' + e.message);
+        alert('Invalid answer: ' + e.message);
     }
 }
 
-// JOIN: Create answer
 async function createJoinAnswer() {
     const offerStr = document.getElementById('join-offer-input').value.trim();
     if(!offerStr) {
@@ -494,16 +603,15 @@ async function createJoinAnswer() {
         return;
     }
     
-    updateJoinStatus('connecting', 'Creating answer...');
+    updateStatus('join', 'connecting', 'Creating...');
     
     try {
         const offer = JSON.parse(atob(offerStr));
         
         pc = new RTCPeerConnection(iceServers);
-        
         pc.ondatachannel = (e) => {
             dc = e.channel;
-            setupDataChannel(dc);
+            setupDataChannel(e.channel);
         };
         
         await pc.setRemoteDescription(offer);
@@ -512,20 +620,17 @@ async function createJoinAnswer() {
         await pc.setLocalDescription(answer);
         
         pc.onicecandidate = (e) => {
-            if(!e.candidate) {
+            if(!e.candidate && pc.localDescription) {
                 const answerStr = btoa(JSON.stringify(pc.localDescription));
                 document.getElementById('join-answer').innerText = answerStr;
                 document.getElementById('join-answer-box').classList.remove('hidden');
-                updateJoinStatus('connecting', 'Answer created! Send to host and wait...');
-                
-                // Wait for connection
+                updateStatus('join', 'connecting', 'Answer ready! Send to host.');
                 waitForConnection();
             }
         };
         
     } catch(e) {
-        alert('Failed: ' + e.message);
-        updateJoinStatus('error', 'Failed to create answer');
+        showError('Failed: ' + e.message);
     }
 }
 
@@ -537,23 +642,19 @@ function waitForConnection() {
             myId = 1;
             startGame();
         }
-    }, 100);
+    }, 200);
 }
 
 function setupDataChannel(channel) {
     channel.onopen = () => {
-        console.log('🎮 Data channel OPEN!');
-        updateHostStatus('connected', 'Connected!');
-        updateJoinStatus('connected', 'Connected!');
+        console.log('Data channel open!');
+        updateStatus(isHost ? 'host' : 'join', 'connected', 'Connected!');
     };
     
     channel.onmessage = (e) => {
         const msg = JSON.parse(e.data);
         handleMessage(msg);
     };
-    
-    channel.onclose = () => console.log('Channel closed');
-    channel.onerror = (e) => console.error('Channel error:', e);
 }
 
 function send(msg) {
@@ -570,13 +671,13 @@ function handleMessage(msg) {
             updateRemotePlayer(msg.data);
             break;
         case 'attack':
-            handleRemoteAttack(msg);
+            if(msg.data.id !== myId) doRemoteAttack(msg.data.id);
             break;
         case 'damage':
             if(msg.target === myId) takeDamage(msg.damage, msg.source);
             break;
         case 'death':
-            handleRemoteDeath(msg.id, msg.killer);
+            if(msg.id !== myId) handleRemoteDeath(msg.id, msg.killer);
             break;
     }
 }
@@ -585,11 +686,11 @@ function startGame() {
     document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
     document.getElementById('game-hud').classList.remove('hidden');
     
-    // Create players
-    createPlayer(myId, true); // Local
+    createBoundaries();
     
-    const otherId = myId === 0 ? 1 : 0;
-    createPlayer(otherId, false); // Remote
+    // Create both players
+    createPlayer(myId, true);
+    createPlayer(myId === 0 ? 1 : 0, false);
     
     gameActive = true;
     createHUD();
@@ -597,8 +698,8 @@ function startGame() {
 }
 
 function createPlayer(id, isLocal) {
-    const group = new THREE.Group();
     const color = CONFIG.colors[id];
+    const group = new THREE.Group();
     
     // Body
     const body = new THREE.Mesh(
@@ -667,9 +768,16 @@ function createPlayer(id, isLocal) {
     
     scene.add(group);
     
-    // Spawn position
+    // Spawn at deterministic position
     const angle = id === 0 ? 0 : Math.PI;
-    group.position.set(Math.cos(angle) * 15, 10, Math.sin(angle) * 15);
+    const dist = 15;
+    const x = Math.cos(angle) * dist;
+    const z = Math.sin(angle) * dist;
+    const y = getTerrainHeight(x, z) + 1.1;
+    
+    group.position.set(x, y, z);
+    
+    console.log(`Player ${id} spawned at (${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)})`);
     
     const player = {
         id, mesh: group, isLocal, hp: 100, maxHp: 100,
@@ -695,17 +803,17 @@ function createHUD() {
         card.id = 'card-' + p.id;
         card.style.borderColor = '#' + p.color.toString(16).padStart(6, '0');
         card.innerHTML = `
-            <div style="font-size: 0.75rem; color: #${p.color.toString(16).padStart(6, '0')}; font-weight: bold;">
+            <div style="font-size: 0.7rem; color: #${p.color.toString(16).padStart(6, '0')}; font-weight: bold;">
                 P${p.id + 1} ${p.isLocal ? '(YOU)' : ''}
             </div>
             <div class="hp-bar">
                 <div class="hp-fill" id="hp-${p.id}" style="width: 100%; background: #${p.color.toString(16).padStart(6, '0')}"></div>
             </div>
-            <div class="ult-bar">
-                <div class="ult-fill" id="ult-${p.id}"></div>
+            <div class="hp-bar" style="height: 4px; margin-top: 4px;">
+                <div id="ult-${p.id}" style="height: 100%; background: #fbbf24; width: 0%"></div>
             </div>
-            <div style="font-size: 0.6rem; color: #ef4444; margin-top: 6px;">
-                💀 <span id="deaths-${p.id}">0</span>/5
+            <div style="font-size: 0.55rem; color: #ef4444; margin-top: 4px;">
+                Deaths: <span id="deaths-${p.id}">0</span>/5
             </div>
         `;
         container.appendChild(card);
@@ -724,20 +832,14 @@ function updateHUD() {
         
         const card = document.getElementById('card-' + p.id);
         if(card) {
-            if(p.isDead) card.style.opacity = '0.4';
-            else card.style.opacity = '1';
-            
+            card.style.opacity = p.isDead ? '0.4' : '1';
             if(p.ultimateCharge >= CONFIG.ultimateDeaths && p.isLocal) {
-                card.style.boxShadow = '0 0 30px #fbbf24';
+                card.style.boxShadow = '0 0 20px #fbbf24';
             } else {
                 card.style.boxShadow = 'none';
             }
         }
     });
-}
-
-function getTerrainHeight(x, z) {
-    return simplex.noise2D(x * 0.02, z * 0.02) * 5;
 }
 
 function generateChunk(cx, cz) {
@@ -769,7 +871,6 @@ function generateChunk(cx, cz) {
 function update(dt) {
     if(!gameActive) return;
     
-    // Update local
     if(localPlayer && !localPlayer.isDead) {
         updateLocalPlayer(dt);
     }
@@ -796,7 +897,7 @@ function update(dt) {
         }
     }
     
-    // Network sync
+    // Network
     if(localPlayer && Math.random() < 0.3) {
         send({
             type: 'playerState',
@@ -819,7 +920,7 @@ function update(dt) {
 function updateLocalPlayer(dt) {
     const p = localPlayer;
     
-    // Move
+    // Movement
     const targetSpeed = keys['ShiftLeft'] ? CONFIG.playerRunSpeed : CONFIG.playerSpeed;
     
     if(keys['KeyW'] || keys['ArrowUp']) {
@@ -836,13 +937,26 @@ function updateLocalPlayer(dt) {
     p.velocity.x = Math.sin(p.mesh.rotation.y) * p.speed;
     p.velocity.z = Math.cos(p.mesh.rotation.y) * p.speed;
     
-    p.mesh.position.x += p.velocity.x * dt;
-    p.mesh.position.z += p.velocity.z * dt;
+    const newPos = p.mesh.position.clone();
+    newPos.x += p.velocity.x * dt;
+    newPos.z += p.velocity.z * dt;
+    
+    const boundaryCheck = checkBoundaries(newPos, 0.5);
+    p.mesh.position.x = boundaryCheck.position.x;
+    p.mesh.position.z = boundaryCheck.position.z;
+    
+    if(boundaryCheck.clamped) p.speed *= 0.5;
     
     // Physics
     const groundH = getTerrainHeight(p.mesh.position.x, p.mesh.position.z);
     
-    if((keys['Space']) && !p.isJumping) {
+    if(p.mesh.position.y < groundH - 10) {
+        // Fell through, respawn
+        p.mesh.position.y = groundH + 10;
+        p.velocity.y = 0;
+    }
+    
+    if(keys['Space'] && !p.isJumping) {
         p.velocity.y = CONFIG.jumpForce;
         p.isJumping = true;
     }
@@ -874,7 +988,7 @@ function updateLocalPlayer(dt) {
         mouse.rightDown = false;
     }
     
-    // Animate
+    // Animation
     if(Math.abs(p.speed) > 1) {
         const time = Date.now() * 0.01;
         p.mesh.children[2].rotation.x = Math.sin(time) * 0.5;
@@ -892,7 +1006,6 @@ function doAttack() {
     p.attackCooldown = 0.4;
     p.weapon.visible = true;
     
-    // Swing
     let swing = 0;
     const anim = setInterval(() => {
         swing += 0.4;
@@ -907,7 +1020,6 @@ function doAttack() {
     
     send({ type: 'attack', data: { id: myId } });
     
-    // Hit check
     const otherId = myId === 0 ? 1 : 0;
     const other = players.get(otherId);
     if(other && !other.isDead) {
@@ -922,13 +1034,26 @@ function doAttack() {
     }
 }
 
+function doRemoteAttack(id) {
+    const p = players.get(id);
+    if(!p) return;
+    
+    p.isAttacking = true;
+    p.weapon.visible = true;
+    
+    setTimeout(() => {
+        p.isAttacking = false;
+        p.weapon.visible = false;
+        p.rightArm.rotation.x = 0;
+    }, 400);
+}
+
 function doUltimate() {
     const p = localPlayer;
     p.ultimateCharge = 0;
     
     send({ type: 'attack', data: { id: myId, ultimate: true } });
     
-    // AOE
     const otherId = myId === 0 ? 1 : 0;
     const other = players.get(otherId);
     if(other && !other.isDead) {
@@ -945,7 +1070,6 @@ function takeDamage(damage, source) {
     const p = localPlayer;
     p.hp -= damage;
     
-    // Flash
     p.mesh.children[0].material.emissive.setHex(0xff0000);
     p.mesh.children[0].material.emissiveIntensity = 0.8;
     setTimeout(() => {
@@ -953,9 +1077,7 @@ function takeDamage(damage, source) {
         p.mesh.children[0].material.emissiveIntensity = 0;
     }, 100);
     
-    if(p.hp <= 0) {
-        die(source);
-    }
+    if(p.hp <= 0) die(source);
 }
 
 function die(killerId) {
@@ -973,11 +1095,14 @@ function die(killerId) {
         addKillFeed('P' + (myId + 1) + ' ELIMINATED! 💀');
         checkWinner();
     } else {
-        // Respawn
         setTimeout(() => {
             p.hp = p.maxHp;
             const angle = Math.random() * Math.PI * 2;
-            p.mesh.position.set(Math.cos(angle) * 25, 15, Math.sin(angle) * 25);
+            const dist = Math.random() * 20;
+            const x = Math.cos(angle) * dist;
+            const z = Math.sin(angle) * dist;
+            const y = getTerrainHeight(x, z);
+            p.mesh.position.set(x, y + 1.1, z);
             p.mesh.visible = true;
         }, 2000);
     }
@@ -1017,7 +1142,10 @@ function updateRemotePlayer(data) {
     const p = players.get(data.id);
     if(!p || p.isLocal) return;
     
-    p.mesh.position.set(data.x, data.y, data.z);
+    // CRITICAL: Recalculate Y based on local terrain for perfect sync
+    const correctY = getTerrainHeight(data.x, data.z) + 1.1;
+    
+    p.mesh.position.set(data.x, correctY, data.z);
     p.mesh.rotation.y = data.rot;
     p.hp = data.hp;
     p.deaths = data.deaths;
@@ -1044,10 +1172,12 @@ function addKillFeed(msg) {
 function animate() {
     requestAnimationFrame(animate);
     update(clock.getDelta());
-    renderer.render(scene, camera);
+    if(renderer && scene && camera) {
+        renderer.render(scene, camera);
+    }
 }
 
-// ==================== UI HELPERS ====================
+// ==================== UI ====================
 
 function startHost() {
     document.getElementById('menu-screen').classList.add('hidden');
@@ -1064,19 +1194,15 @@ function backToMenu() {
     document.getElementById('menu-screen').classList.remove('hidden');
 }
 
-function updateHostStatus(type, text) {
-    const dot = document.getElementById('host-status-dot');
-    dot.className = 'status-dot ' + (type === 'connected' ? 'connected' : type === 'connecting' ? 'connecting' : '');
-    document.getElementById('host-status-text').innerText = text;
+function updateStatus(type, state, text) {
+    const dot = document.getElementById(type + '-status-dot');
+    const txt = document.getElementById(type + '-status-text');
+    
+    dot.className = 'status-dot ' + (state === 'connected' ? 'connected' : state === 'connecting' ? 'connecting' : '');
+    txt.innerText = text;
 }
 
-function updateJoinStatus(type, text) {
-    const dot = document.getElementById('join-status-dot');
-    dot.className = 'status-dot ' + (type === 'connected' ? 'connected' : type === 'connecting' ? 'connecting' : '');
-    document.getElementById('join-status-text').innerText = text;
-}
-
-function copyToClipboard(el) {
+function copyText(el) {
     navigator.clipboard.writeText(el.innerText).then(() => {
         el.style.background = '#1a3a1a';
         setTimeout(() => el.style.background = '#000', 200);
@@ -1084,7 +1210,10 @@ function copyToClipboard(el) {
 }
 
 // Start
-init();
+window.onload = function() {
+    console.log('Window loaded, starting init...');
+    init();
+};
 
 </script>
 </body>
